@@ -1,4 +1,4 @@
-Validation report -- 2026-09-19 01:23 -- compartments: stromal
+Validation report -- 2026-09-19 01:39 -- compartments: stromal
 44/44 checks passed (2s)
 
 [PASS] groups are the 6 CellOracle groups in order
@@ -45,48 +45,3 @@ Validation report -- 2026-09-19 01:23 -- compartments: stromal
 [PASS] CDN library reachable: graphology@0.26.0/dist/graphology.umd.min.js
 [PASS] CDN library reachable: sigma@3.0.3/dist/sigma.min.js
 [PASS] site folder size reasonable for sharing (< 25 MB) -- 5.4 MB
-
-Browser smoke test (headless Chromium, script/tests/browser_smoke.js):
-== browser smoke test: http://127.0.0.1:8765/local_host_development/site/
-  [PASS] First visit opens the Reading Guide
-  [PASS] Guide is 'Reading Guide in 5 Steps' with 5 numbered cards -- 1:Dots & lines | 2:Territories | 3:Line colours | 4:Hover & click | 5:Panels
-  [PASS] Guide step cards are concise (< 90 words total) -- 67 words
-  [PASS] 'Start exploring' closes the guide
-  [PASS] Help button reopens the guide and × closes it
-  [PASS] Guide does not reopen after it has been seen
-  [PASS] 'Limits of this map' opens the guide at the limits section
-  [PASS] Evidence tiers use four distinct colours -- rgb(74, 222, 128) rgb(250, 204, 21) rgb(251, 146, 60) rgb(82, 82, 91)
-  [PASS] Every control shows a short explanation -- [27,32,24,9]
-  [PASS] Left panel cards numbered 1-7 with the shared badge -- 1,2,3,4,5,6,7
-  [PASS] Dragging the left bar widens the left panel -- 350 -> 430
-  [PASS] Dragging the right bar widens the right panel -- 350 -> 410
-  [PASS] Map shrinks to fit and the graph canvas follows -- stage 788 -> 648, canvas 648
-  [PASS] Panel widths are remembered after reload
-  [PASS] Double-click resets panel widths
-  [PASS] Both: in both / new / missing = 1,425 / 575 / 575 -- {"Genes":736,"Links in both":1425,"New in RIF":575,"Missing in RIF":575,"Between territories":1419,"Known links":145}
-  [PASS] Fertile network = 2,000 links (in both + missing in RIF)
-  [PASS] RIF network = 2,000 links (in both + new in RIF)
-  [PASS] 'Known links' filter shows only CollecTRI-supported links -- 145 links
-  [PASS] 'Known genes' filter narrows the network -- {"Genes":736,"Links in both":57,"New in RIF":12,"Missing in RIF":16,"Between territories":54,"Known links":17}
-  [PASS] Literature colouring shows its 4-tier legend
-  [PASS] Territory panel lists known regulators and novel candidates
-  [PASS] Known-regulator list is populated -- 12 genes
-  [PASS] HAND2: curated note shown with draft status
-  [PASS] Gene panel sections A-D in order: Name, Function in implantation, General function, Literature -- ["AName▶","BFunction in implantation▶","CGeneral function▶","DLiterature Moderate · 7▶"]
-  [PASS] Gene view cards lettered A-F with the shared badge -- ABCDEF
-  [PASS] Badges styled identically in left and right panels
-  [PASS] HAND2: alternative names shown (e.g. dHand)
-  [PASS] HAND2: note citations link to PubMed -- https://pubmed.ncbi.nlm.nih.gov/24745730/ https://pubmed.ncbi.nlm.nih.gov/32444497/
-  [PASS] Citations are PMID hyperlinks only -- PMID 24745730, PMID 32444497, PMID 24745730, PMID 21527398, PMID 34581822, PMID 32444497, PMID 30852242, PMID 32444497, PMID 30270745, PMID 29767873
-  [PASS] No written-out reference list in the gene panel
-  [PASS] C11orf96: shown as novel candidate with no implantation literature
-  [PASS] ZEB1: 'Confirmed by 2 methods' tag shown
-  [PASS] ZEB1: at least one edge carries a CollecTRI 'lit' badge -- 1 badges
-  [PASS] Escape clears selection
-  [PASS] Escape leaves no stale selection ring (regression) -- {"hovers":0,"selection":0} painted pixels
-  [PASS] Territory detail opens (roads + importance changes)
-  [PASS] Phone width (390px): no horizontal scroll -- overflow 0px
-  [PASS] No JavaScript errors
-  [PASS] No failed network requests
-
-40/40 browser checks passed

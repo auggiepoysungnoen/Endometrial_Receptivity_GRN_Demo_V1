@@ -240,3 +240,19 @@ the filled purple lettered badge.
   fallbacks aligned, incl. the <1100 px layout). Limits unchanged: left
   190-480, right 260-620. Browser suite 40/40.
 demo_v1: header pill + page title
+
+[2026-09-19] demo_v1 published + handoff for Nandini
+----------------------------------------------------
+- Pushed to https://github.com/auggiepoysungnoen/Endometrial_Receptivity_GRN_Demo_V1
+  (public; commit c647c7b, tag demo_v1; author Koravit Poysungnoen
+  <august.poysungnoen@duke.edu>) via a repo-scoped deploy key
+  (~/.ssh/grn_demo_v1_deploy on this machine). Excluded: data/, figures/,
+  .cache/, non-stromal annotation files.
+- GitHub Pages via Actions workflow (.github/workflows/pages.yml); live at
+  https://auggiepoysungnoen.github.io/Endometrial_Receptivity_GRN_Demo_V1/ ;
+  browser suite 40/40 against the live URL.
+- Added HANDOFF.md, requirements.txt, environment.yml (versions verified on
+  PyPI + conda-forge). Tested the handoff on a fresh clone + copied data/:
+  validator 42/42 + 2 SKIP (cache-dependent checks now skip with a hint
+  instead of crashing), territory rebuild byte-identical to the committed
+  graph, site served from repo root 40/40.

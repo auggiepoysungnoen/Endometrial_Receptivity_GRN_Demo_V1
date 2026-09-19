@@ -44,6 +44,21 @@ def check(name, ok, detail=""):
     return ok
 
 
+skipped = []
+CACHE = DEV / ".cache"
+CACHE_HINT = "needs local_host_development/.cache -- run build_gene_annotations.py once"
+
+
+def skip(name, why=CACHE_HINT):
+    """Checks that need the (git-ignored) download cache are skipped, not passed."""
+    skipped.append((name, why))
+    print(f"  [SKIP] {name} -- {why}")
+
+
+def have_cache(*names):
+    return all((CACHE / n).exists() for n in names)
+
+
 def spearman(x, y):
     def rank(v):
         order = sorted(range(len(v)), key=lambda i: v[i])
@@ -222,7 +237,10 @@ def validate_literature(comp, g):
     mine = {k: v for k, v in lit.items() if k in net}
     check("literature edge entries have a valid sign and >= 1 reference",
           all(v["sign"] in "+-?" and v["nRefs"] >= 1 and v["refs"] for v in lit.values()), f"{len(mine)} in {comp}")
-    raw = (DEV / ".cache" / "collectri.tsv").read_text().splitlines()
+    if not have_cache("collectri.tsv"):
+        skip("CollecTRI support re-derived from raw download (400 random edges)")
+        return
+    raw = (CACHE / "collectri.tsv").read_text().splitlines()
     head = raw[0].split("\t")
     s_i, t_i = head.index("source_genesymbol"), head.index("target_genesymbol")
     r_i = head.index("references")
@@ -260,6 +278,9 @@ def validate_literature_tools():
     check("curation check rejects an untraceable citation (negative test)", rejected)
 
     # Every note's PMIDs traceable in the full (not truncated) evidence
+    if not have_cache("mygene_v2.json", "gene_pubmed_implantation.json", "generifs_basic.gz"):
+        skip("every curated-note PMID is linked to that gene in NCBI (GeneRIF or gene2pubmed)")
+        return
     notes = bga.read_notes()
     mg = json.loads((DEV / ".cache" / "mygene_v2.json").read_text())
     ent = {h["query"]: str(h["entrezgene"]) for h in mg if "entrezgene" in h and not h.get("notfound")}
@@ -317,9 +338,12 @@ def main():
     validate_site_files(comps)
     n_fail = sum(1 for ok, *_ in results if not ok)
     summary = f"{len(results) - n_fail}/{len(results)} checks passed ({time.time() - t0:.0f}s)"
+    if skipped:
+        summary += f"; {len(skipped)} skipped ({CACHE_HINT})"
     print(f"\n{summary}")
     report = [f"Validation report -- {time.strftime('%Y-%m-%d %H:%M')} -- compartments: {', '.join(comps)}",
-              summary, ""] + [f"[{'PASS' if ok else 'FAIL'}] {n}" + (f" -- {d}" if d else "") for ok, n, d in results]
+              summary, ""] + [f"[{'PASS' if ok else 'FAIL'}] {n}" + (f" -- {d}" if d else "") for ok, n, d in results] \
+        + [f"[SKIP] {n} -- {w}" for n, w in skipped]
     (DEV / "workflow" / "validation_report.txt").write_text("\n".join(report) + "\n")
     return 1 if n_fail else 0
 

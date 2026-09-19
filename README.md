@@ -11,6 +11,8 @@ at **LH+7** (window of implantation). Networks inferred with CellOracle.
 > automatically from NCBI / CollecTRI, and the 36 gene notes are drafts
 > pending lab review (see `local_host_development/curation/`).
 
+**Taking over development?** Start with [`HANDOFF.md`](HANDOFF.md).
+
 ## What's here
 
 | Path | Contents |
