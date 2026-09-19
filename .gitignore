@@ -1,0 +1,19 @@
+# demo_v1 publishes the interactive site + its build/validation code only.
+
+# Exported analysis data and paper figures (unpublished; large) -- kept local
+/data/
+/figures/
+
+# Re-downloadable NCBI/CollecTRI downloads (96 MB)
+/local_host_development/.cache/
+
+# Annotation files for compartments the demo does not show yet
+/local_host_development/site/data/activatednk_annotations.json
+/local_host_development/site/data/epithelial_annotations.json
+/local_host_development/site/data/tcell_annotations.json
+/local_host_development/site/data/unk_annotations.json
+
+__pycache__/
+*.pyc
+node_modules/
+.DS_Store
