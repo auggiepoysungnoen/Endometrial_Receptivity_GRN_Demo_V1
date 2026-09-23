@@ -1,5 +1,5 @@
-Validation report -- 2026-09-19 01:39 -- compartments: stromal
-44/44 checks passed (2s)
+Validation report -- 2026-09-22 21:29 -- compartments: stromal
+44/44 checks passed (3s)
 
 [PASS] groups are the 6 CellOracle groups in order
 [PASS] gene ids unique -- 1000 genes
