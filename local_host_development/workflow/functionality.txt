@@ -165,3 +165,16 @@ D. Rendering
 - The atlas still works when opened directly (atlas.html with no ?ui=), which
   keeps shared links and deep links working.
 - Scripts run from this workspace or from a website repo (script/_paths.py).
+
+10. GENE PANEL 2026-09-22 (v1.5)
+---------------------------------
+Sections, always open, in this order: A Name, B Roles in implantation,
+C General roles, D Cell-type specificity, E Literature evidence,
+F Confirmed links, G In this network, H Gene links.
+- D: centrality percentile per compartment (fertile LH+7). Network position,
+  never expression level.
+- E: table (Reference | Finding). Reference = PMID link, first author + year,
+  journal. Finding = the gene-specific GeneRIF line, plus the paper title
+  when it says something different. 4 rows, "Show N more", and a PubMed
+  search link so nothing is hidden.
+- Citations appear only in E.

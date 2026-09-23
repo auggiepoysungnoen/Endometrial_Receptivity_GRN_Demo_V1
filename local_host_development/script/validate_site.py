@@ -259,6 +259,69 @@ def validate_literature(comp, g):
     check("CollecTRI support re-derived from raw download (400 random edges)", agree)
 
 
+def validate_citations(comp, sample=24):
+    """Every citation the site shows must match the real PubMed record.
+
+    Takes a random sample of the PMIDs displayed for this compartment and
+    re-fetches them from PubMed, comparing first author, year and title with
+    what is stored. Also checks that each gene-specific line is attached to a
+    PMID that NCBI links to that gene.
+    """
+    print(f"\n== {comp}: citation accuracy (live PubMed check)")
+    a = json.loads((SITE / "data" / f"{comp}_annotations.json").read_text())["genes"]
+    shown = {}
+    for g, v in a.items():
+        for r in (v.get("rifsImpl") or []) + (v.get("papers") or []) + ((v.get("note") or {}).get("cites") or []):
+            if r.get("pmid"):
+                shown.setdefault(r["pmid"], []).append((g, r))
+    check("every displayed citation carries author, year and title",
+          all(r.get("author") and r.get("year") and r.get("title")
+              for recs in shown.values() for _, r in recs),
+          f"{len(shown)} distinct PMIDs")
+
+    random.seed(7)
+    pick = random.sample(sorted(shown), min(sample, len(shown)))
+    try:
+        url = ("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=json&id="
+               + ",".join(pick))
+        with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "astraea-validate"}), timeout=60) as r:
+            live = json.load(r)["result"]
+    except Exception as e:  # noqa: BLE001
+        skip(f"{comp}: citation accuracy against live PubMed", f"no network ({e})")
+        return
+    bad = []
+    for pid in pick:
+        real = live.get(pid, {})
+        want_author = (real.get("sortfirstauthor") or "").strip()
+        want_year = (real.get("pubdate") or "")[:4]
+        want_title = (real.get("title") or "").rstrip(".").strip().lower()
+        for g, r in shown[pid]:
+            if r.get("author", "") != want_author or r.get("year", "") != want_year \
+               or r.get("title", "").strip().lower() != want_title:
+                bad.append(f"{g}/{pid}")
+    check(f"sampled citations match PubMed exactly ({len(pick)} PMIDs)", not bad, ", ".join(bad[:6]))
+
+    # gene-specific lines must come from that gene's own GeneRIF records
+    if have_cache("generifs_basic.gz", "mygene_v2.json"):
+        mg = json.loads((CACHE / "mygene_v2.json").read_text())
+        ent = {h["query"]: str(h["entrezgene"]) for h in mg if "entrezgene" in h and not h.get("notfound")}
+        want = {ent[g] for g in a if g in ent}
+        pairs = set()
+        with gzip.open(CACHE / "generifs_basic.gz", "rt", encoding="utf-8", errors="replace") as fh:
+            next(fh)
+            for line in fh:
+                tax, gid, pm, _ts, _txt = line.split("\t", 4)
+                if tax == "9606" and gid in want:
+                    for x in pm.split(","):
+                        pairs.add((gid, x))
+        wrong = [f"{g}/{r['pmid']}" for g, v in a.items() for r in (v.get("rifsImpl") or [])
+                 if g in ent and (ent[g], r["pmid"]) not in pairs]
+        check("every gene-specific finding comes from that gene's own GeneRIF record",
+              not wrong, ", ".join(wrong[:5]))
+    else:
+        skip("gene-specific findings traced to their GeneRIF records")
+
+
 def validate_literature_tools():
     print("\n== literature tools (regression + negative tests)")
     cases = {
@@ -351,6 +414,7 @@ def main():
     for c in comps:
         g = validate_graph(c)
         validate_literature(c, g)
+        validate_citations(c)
     validate_literature_tools()
     validate_site_files(comps)
     n_fail = sum(1 for ok, *_ in results if not ok)

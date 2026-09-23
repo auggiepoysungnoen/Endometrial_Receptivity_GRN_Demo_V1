@@ -216,7 +216,8 @@ def implantation_papers(info):
                 r = d["result"][pid]
                 meta[pid] = {"title": r.get("title", "").rstrip("."),
                              "journal": r.get("source", ""),
-                             "year": (r.get("pubdate", "") or "")[:4]}
+                             "year": (r.get("pubdate", "") or "")[:4],
+                             "author": r.get("sortfirstauthor", "")}
             print(f"    esummary {min(i + 200, len(want))}/{len(want)}")
         return json.dumps(meta).encode()
     meta = json.loads(cached("pubmed_meta.json", fetch_meta).read_text())
@@ -288,13 +289,40 @@ def check_notes(notes, info, rif_impl, rif_endo, links):
         for pid in d["result"].get("uids", []):
             r = d["result"][pid]
             meta[pid] = {"pmid": pid, "title": r.get("title", "").rstrip("."),
-                         "journal": r.get("source", ""), "year": (r.get("pubdate", "") or "")[:4]}
+                         "journal": r.get("source", ""), "year": (r.get("pubdate", "") or "")[:4],
+                         "author": r.get("sortfirstauthor", "")}
     path.write_text(json.dumps(meta))
     missing = [p for n in notes.values() for p in n["pmids"] if p not in meta]
     if missing:
         print(f"CURATION CHECK FAILED: PubMed returned no record for {missing}")
         sys.exit(1)
     return meta
+
+
+def cell_type_profile(per_comp):
+    """Per compartment: is the gene in that network, and how central is it?
+
+    Network specificity, not expression specificity -- the exports carry no
+    per-cell expression. Percentile is within that compartment's Fertile LH+7
+    network, so compartments of different size stay comparable.
+    """
+    out = {}
+    for comp in sorted(per_comp):
+        f = EXPORTS / comp / "node_centrality.csv"
+        if not f.exists():
+            continue
+        vals = {}
+        with open(f, newline="") as fh:
+            for r in csv.DictReader(fh):
+                if r["cluster"] == "Fertile_LH+7":
+                    vals[r["gene"]] = float(r["eigenvector_centrality"])
+        if not vals:
+            continue
+        order = sorted(vals.values())
+        for g, v in vals.items():
+            pct = 100.0 * sum(1 for x in order if x <= v) / len(order)
+            out.setdefault(g, {})[comp] = {"eig": round(v, 4), "pct": round(pct)}
+    return out
 
 
 def tier(n):
@@ -325,9 +353,34 @@ def main():
     lit_edges = collectri(union_pairs)
     print(f"    {len(lit_edges)}/{len(union_pairs)} network edges have CollecTRI support")
 
+    print("[5/5] cell-type profile (network presence per compartment)")
+    profile = cell_type_profile(per_comp)
+    print(f"    genes with a profile: {len(profile)}")
+
     notes = read_notes()
     print(f"    curated notes: {len(notes)}")
     cites = check_notes(notes, info, rif_impl, rif_endo, links)
+
+    # PubMed metadata for the GeneRIF statements we keep (author + year for
+    # the evidence table); the paper lists already have theirs.
+    rif_pmids = sorted({r["pmid"] for g in genes
+                        for r in (rif_impl.get(g, [])[:6] + rif_endo.get(g, [])[:3])
+                        if r["pmid"].isdigit()})
+    path = CACHE / "rif_citations.json"
+    rmeta = json.loads(path.read_text()) if path.exists() else {}
+    need = [p for p in rif_pmids if p not in rmeta]
+    for i in range(0, len(need), 200):
+        d = eutils("esummary", {"db": "pubmed", "id": ",".join(need[i:i + 200])})
+        for pid in d["result"].get("uids", []):
+            r = d["result"][pid]
+            rmeta[pid] = {"author": r.get("sortfirstauthor", ""), "year": (r.get("pubdate", "") or "")[:4],
+                          "title": r.get("title", "").rstrip("."), "journal": r.get("source", "")}
+        print(f"    GeneRIF citations {min(i + 200, len(need))}/{len(need)}")
+    if need:
+        path.write_text(json.dumps(rmeta))
+
+    def with_meta(recs):
+        return [{**r, **{k: v for k, v in rmeta.get(r["pmid"], {}).items() if v}} for r in recs]
 
     ann = {}
     for g in genes:
@@ -343,9 +396,10 @@ def main():
             "nImpl": len(pm),
             "tier": tier(len(pm)),
             "papers": [{"pmid": p, **meta[p]} for p in pm[:3] if p in meta],
-            "rifsImpl": rif_impl.get(g, [])[:6],
+            "rifsImpl": with_meta(rif_impl.get(g, [])[:6]),
             "nRifsImpl": len(rif_impl.get(g, [])),
-            "rifsEndo": rif_endo.get(g, [])[:3],
+            "cellTypes": profile.get(g, {}),
+            "rifsEndo": with_meta(rif_endo.get(g, [])[:3]),
             "nRifsEndo": len(rif_endo.get(g, [])),
             "note": ({**notes[g], "cites": [cites[p] for p in notes[g]["pmids"]]}
                      if g in notes else None),

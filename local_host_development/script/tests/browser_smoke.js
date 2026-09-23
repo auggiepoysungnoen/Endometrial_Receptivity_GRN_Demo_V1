@@ -152,24 +152,40 @@ const shot = async (p, name) => { if (OUT) await p.screenshot({ path: `${OUT}/${
   const hand2 = await p.$eval("#detail", (d) => d.innerText);
   check("HAND2: curated note shown with draft status", /decidualization/i.test(hand2) && /Draft/.test(hand2));
   const secs = await p.$$eval("#detail .gsec h4", (hs) => hs.map((h) => h.textContent.trim()));
-  check("Gene panel sections A-D in order: Name, Function in implantation, General function, Literature",
-    secs.length === 4 && /^AName/.test(secs[0]) && /^B.*implantation/i.test(secs[1]) && /^C.*general function/i.test(secs[2]) && /^D.*literature/i.test(secs[3]), JSON.stringify(secs));
+  check("Gene panel sections A-F in the agreed order",
+    secs.length === 6 && /^A\s+Name/.test(secs[0]) && /^B\s+roles in implantation/i.test(secs[1])
+    && /^C\s+general roles/i.test(secs[2]) && /^D\s+cell-type specificity/i.test(secs[3])
+    && /^E\s+literature evidence/i.test(secs[4]) && /^F\s+confirmed links/i.test(secs[5]), JSON.stringify(secs));
+  const allOpen = await p.$$eval("#detail .gsec", (ss) => ss.every((s) => s.tagName === "SECTION" && s.querySelector(".gsec-body")?.offsetParent !== null));
+  check("All gene sections stay open", allOpen);
+  const evid = await p.$eval("#detail .gsec[data-sec='E'] table.evid", (tb) => ({
+    cols: [...tb.querySelectorAll("thead th")].map((h) => h.textContent.trim()),
+    rows: tb.querySelectorAll("tbody tr").length,
+    firstRef: tb.querySelector("tbody .ev-cite")?.textContent.trim(),
+  })).catch(() => null);
+  check("Literature evidence is a table with references and findings",
+    !!evid && evid.cols.join("/") === "Reference/Finding" && evid.rows >= 1 && /\(\d{4}\)/.test(evid.firstRef || ""),
+    JSON.stringify(evid));
+  const ct = await p.$$eval("#detail .gsec[data-sec='D'] .ct-row", (rs) => rs.length);
+  check("Cell-type specificity lists all five cell types", ct === 5, `${ct} rows`);
   const rightBadges = await p.$$eval("#detail .badge", (b) => b.map((x) => x.textContent).join(""));
-  check("Gene view cards lettered A-F with the shared badge", rightBadges === "ABCDEF", rightBadges);
+  check("Gene view cards lettered A-H with the shared badge", rightBadges === "ABCDEFGH", rightBadges);
   const sameStyle = await p.evaluate(() => {
     const a = getComputedStyle(document.querySelector(".panel.left .badge")), b = getComputedStyle(document.querySelector("#detail .badge"));
     return a.backgroundColor === b.backgroundColor && a.width === b.width && a.borderRadius === b.borderRadius;
   });
   check("Badges styled identically in left and right panels", sameStyle);
   check("HAND2: alternative names shown (e.g. dHand)", /Also known as.*dHand/.test(hand2));
-  const cites = await p.$$eval(".gsec .note-src a", (as) => as.map((a) => a.href));
-  check("HAND2: note citations link to PubMed", cites.length >= 1 && cites.every((h) => h.startsWith("https://pubmed.ncbi.nlm.nih.gov/")), cites.join(" "));
-  await p.click('#detail .gsec[data-sec="D"] > summary'); await p.waitForTimeout(200);
-  const citeTexts = await p.$$eval('#detail a[href^="https://pubmed"]', (as) => as.map((a) => a.textContent.trim()));
+  check("HAND2: the summary points to its sources in section E", /sources in E/i.test(hand2));
+  const cites = await p.$$eval('#detail .gsec[data-sec="E"] a[href^="https://pubmed"]', (as) => as.map((a) => a.href));
+  check("HAND2: evidence table cites PubMed",
+    cites.length >= 1 && cites.every((h) => h.startsWith("https://pubmed.ncbi.nlm.nih.gov/")), cites.length + " citations");
+  // the "All N on PubMed" search link is deliberately not a PMID citation
+  const citeTexts = await p.$$eval('#detail a[href^="https://pubmed"]', (as) =>
+    as.filter((a) => !a.closest(".ev-foot")).map((a) => a.textContent.trim()));
   check("Citations are PMID hyperlinks only", citeTexts.length > 0 && citeTexts.every((x) => /^PMID \d+$/.test(x)), citeTexts.join(", "));
   const hasRefList = await p.$eval("#detail", (d) => /Sources of the summary/.test(d.innerText) || !!d.querySelector(".cites"));
   check("No written-out reference list in the gene panel", !hasRefList);
-  await p.click('#detail .gsec[data-sec="D"] > summary');
   await shot(p, "04_gene_HAND2");
 
   // Gene without implantation literature -> novel candidate

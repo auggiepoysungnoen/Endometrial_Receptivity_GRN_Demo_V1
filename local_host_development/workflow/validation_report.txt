@@ -1,5 +1,5 @@
-Validation report -- 2026-09-22 22:31 -- compartments: stromal
-49/49 checks passed (2s)
+Validation report -- 2026-09-22 23:53 -- compartments: stromal
+52/52 checks passed (4s)
 
 [PASS] groups are the 6 CellOracle groups in order
 [PASS] gene ids unique -- 1000 genes
@@ -35,6 +35,9 @@ Validation report -- 2026-09-22 22:31 -- compartments: stromal
 [PASS] curated notes: status is 'draft' or 'reviewed' -- 0 reviewed
 [PASS] literature edge entries have a valid sign and >= 1 reference -- 250 in stromal
 [PASS] CollecTRI support re-derived from raw download (400 random edges)
+[PASS] every displayed citation carries author, year and title -- 485 distinct PMIDs
+[PASS] sampled citations match PubMed exactly (24 PMIDs)
+[PASS] every gene-specific finding comes from that gene's own GeneRIF record
 [PASS] GeneRIF classifier: known false positives rejected, true cases kept
 [PASS] curation check rejects an untraceable citation (negative test)
 [PASS] every curated-note PMID is linked to that gene in NCBI (GeneRIF or gene2pubmed) -- 86 citations; untraced []
@@ -49,4 +52,4 @@ Validation report -- 2026-09-22 22:31 -- compartments: stromal
 [PASS] atlas page's compartment has graph + annotation data -- stromal
 [PASS] CDN library reachable: graphology@0.26.0/dist/graphology.umd.min.js
 [PASS] CDN library reachable: sigma@3.0.3/dist/sigma.min.js
-[PASS] site folder size reasonable for sharing (< 25 MB) -- 5.4 MB
+[PASS] site folder size reasonable for sharing (< 25 MB) -- 6.5 MB

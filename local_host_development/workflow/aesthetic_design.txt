@@ -152,3 +152,17 @@ Dark tokens (starting values, to validate):
   starfield (static under prefers-reduced-motion), three outlined tabs that
   turn rose-gold on hover; the tab matching the current screen is marked.
 - Assets are SVG (crisp at any size, themeable); no raster logo files.
+
+10. STYLE SYSTEM 2026-09-22 (v1.5)
+-----------------------------------
+- Type scale (only these five): --fs-xs 11, --fs-sm 12, --fs-md 13,
+  --fs-lg 15, --fs-xl 20. No literal px font sizes anywhere else.
+- Every block in both side panels is the same card: 1px --line border,
+  10px radius, full-bleed header strip (bold 700, uppercase, .05em) with a
+  20px filled purple badge (numbers left panel, letters right panel).
+- Faces: Inter for all labels and body; JetBrains Mono only for numbers and
+  PMIDs (tabular figures); Cinzel for the ASTRAEA wordmark.
+- Logo: faceted 3D star in a tilted ring. Star side-points follow the ring
+  plane (-22°), vertical spike perpendicular; facets shaded from a single
+  upper-left light; ring split into a dim far half (behind the star) and a
+  bright near half (in front) with a white specular streak.

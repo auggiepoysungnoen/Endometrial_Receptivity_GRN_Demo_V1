@@ -1,16 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 250" role="img" aria-label="ASTRAEA">
-  <defs>
-    <linearGradient id="ink" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#f6ddd3"/><stop offset="0.45" stop-color="#e0b2a4"/><stop offset="1" stop-color="#c17f70"/>
-    </linearGradient>
-  </defs>
-  <g transform="translate(126 125)">
-    <circle r="74" fill="none" stroke="url(#ink)" stroke-width="1.6" opacity="0.45"/>
-    <path d="M0 -106 Q 5.5 -11 94 0 Q 5.5 11 0 106 Q -5.5 11 -94 0 Q -5.5 -11 0 -106 Z" fill="url(#ink)"/>
-    <circle cx="0" cy="-99" r="3.6" fill="url(#ink)" opacity="0.85"/>
-    <circle cx="0" cy="99" r="3.6" fill="url(#ink)" opacity="0.85"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1250 260" role="img" aria-label="ASTRAEA">
+  <defs><linearGradient id="inkback" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8f7ff0" stop-opacity=".25"/><stop offset=".5" stop-color="#c792ea" stop-opacity=".55"/><stop offset="1" stop-color="#e87ba4" stop-opacity=".3"/></linearGradient>
+    <linearGradient id="inkfront" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#a98cf0"/><stop offset=".38" stop-color="#e87ba4"/><stop offset=".72" stop-color="#f7d7a2"/><stop offset="1" stop-color="#c792ea" stop-opacity=".55"/></linearGradient>
+    <radialGradient id="inkglow"><stop offset="0" stop-color="#f7d7c9" stop-opacity=".45"/><stop offset="1" stop-color="#f7d7c9" stop-opacity="0"/></radialGradient>
+    <linearGradient id="inkword" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6ddd3"/><stop offset=".5" stop-color="#e0b2a4"/><stop offset="1" stop-color="#c17f70"/></linearGradient></defs>
+  <g transform="translate(132 130)">
+    <g transform="rotate(-22)">
+      <path d="M -108 0 A 108 39 0 0 1 108 0" fill="none" stroke="url(#inkback)" stroke-width="8.6" stroke-linecap="round"/>
+    </g>
+    <circle r="36" fill="url(#inkglow)"/>
+    <path d="M0 0 L0.0 -72.0 L8.9 -13.3 Z" fill="#cdbab0"/>
+    <path d="M0 0 L8.9 -13.3 L55.6 -22.5 Z" fill="#6b4a3d"/>
+    <path d="M0 0 L55.6 -22.5 L13.3 8.9 Z" fill="#6b4a3d"/>
+    <path d="M0 0 L13.3 8.9 L0.0 72.0 Z" fill="#6b4a3d"/>
+    <path d="M0 0 L0.0 72.0 L-8.9 13.3 Z" fill="#6b4a3d"/>
+    <path d="M0 0 L-8.9 13.3 L-55.6 22.5 Z" fill="#715144"/>
+    <path d="M0 0 L-55.6 22.5 L-13.3 -8.9 Z" fill="#94796d"/>
+    <path d="M0 0 L-13.3 -8.9 L0.0 -72.0 Z" fill="#e9d9d1"/>
+    <g transform="rotate(-22)">
+      <path d="M 108 0 A 108 39 0 0 1 -108 0" fill="none" stroke="url(#inkfront)" stroke-width="12" stroke-linecap="round"/>
+      <path d="M 59 30 A 108 39 0 0 1 -22 39" fill="none" stroke="#fff" stroke-opacity=".38" stroke-width="2.6" stroke-linecap="round"/>
+    </g>
   </g>
-  <path d="M258 130 Q 264 121 280 118 Q 264 115 258 106 Q 252 115 236 118 Q 252 121 258 130 Z" fill="url(#ink)" opacity="0.8"/>
-  <text x="318" y="162" font-family="Cinzel, 'Times New Roman', serif" font-size="112" letter-spacing="27" fill="url(#ink)">ASTRAEA</text>
-  <path d="M1084 130 Q 1090 121 1106 118 Q 1090 115 1084 106 Q 1078 115 1062 118 Q 1078 121 1084 130 Z" fill="url(#ink)" opacity="0.8"/>
+  <path d="M292 130 Q 298 121 314 118 Q 298 115 292 106 Q 286 115 270 118 Q 286 121 292 130 Z" fill="url(#inkword)" opacity="0.8"/>
+  <text x="362" y="167" font-family="Cinzel, 'Times New Roman', serif" font-size="110" letter-spacing="38" fill="url(#inkword)">ASTRAEA</text>
+  <path d="M1204 130 Q 1210 121 1226 118 Q 1210 115 1204 106 Q 1198 115 1182 118 Q 1198 121 1204 130 Z" fill="url(#inkword)" opacity="0.8"/>
 </svg>
