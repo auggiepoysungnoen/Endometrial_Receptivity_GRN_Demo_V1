@@ -105,6 +105,46 @@ def validate_graph(comp):
     check("all coordinates finite", all(math.isfinite(n["x"]) and math.isfinite(n["y"]) for n in N))
     check("all edges reference valid genes", all(0 <= s < len(N) and 0 <= t < len(N) for s, t, _ in E))
 
+    # Territory geometry + placement (no exported data needed)
+    sizes = {}
+    for n in N:
+        sizes[n["m"]] = sizes.get(n["m"], 0) + 1
+    check("territory sizes match gene membership", all(sizes.get(t["id"]) == t["size"] for t in T))
+    byid = {n["id"]: n for n in N}
+    check("each hub is a member TF of its territory",
+          all(byid[t["hub"]]["m"] == t["id"] and byid[t["hub"]]["tf"] and byid[t["hub"]]["hub"] for t in T))
+    check("each hub sits at its territory centre",
+          all(abs(byid[t["hub"]]["x"] - t["x"]) < 0.01 and abs(byid[t["hub"]]["y"] - t["y"]) < 0.01 for t in T))
+    check("every gene lies inside its own territory disk",
+          all(math.hypot(n["x"] - T[n["m"]]["x"], n["y"] - T[n["m"]]["y"]) <= T[n["m"]]["r"] + 0.01 for n in N))
+    gaps = [math.hypot(a["x"] - b["x"], a["y"] - b["y"]) - a["r"] - b["r"]
+            for i, a in enumerate(T) for b in T[i + 1:]]
+    check("territories do not overlap", min(gaps) > 0, f"min gap {min(gaps):.2f}")
+    k = len(T)
+    w = [[0.0] * k for _ in range(k)]
+    for s, t, c in E:
+        ms, mt = N[s]["m"], N[t]["m"]
+        if ms != mt:
+            v = sum(abs(x) for x in c if x is not None)
+            w[ms][mt] += v
+            w[mt][ms] += v
+    S = [sum(r) for r in w]
+    aff, gap = [], []
+    for i in range(k):
+        for j in range(i + 1, k):
+            aff.append(w[i][j] / math.sqrt(S[i] * S[j]) if S[i] and S[j] else 0.0)
+            gap.append(math.hypot(T[i]["x"] - T[j]["x"], T[i]["y"] - T[j]["y"]) - T[i]["r"] - T[j]["r"])
+    rho = spearman(aff, gap)
+    check("territory positions reflect interaction strength (recomputed Spearman rho < -0.5)",
+          rho < -0.5, f"rho(affinity, gap) = {rho:.3f}; stored {json.dumps(g.get('placement', {}))}")
+
+    if not d.is_dir():
+        # A website-only checkout has no exported CellOracle results; the
+        # self-contained checks above still ran.
+        skip(f"{comp}: checks against the original exports in {EXPORTS.name}/",
+             f"needs {EXPORTS.name}/{comp}/ -- copy it from the analysis workspace")
+        return g
+
     # Edge set and coefficients vs network_snapshots.csv
     snap = rows(d / "network_snapshots.csv")
     src = {}
@@ -174,40 +214,6 @@ def validate_graph(comp):
     check("dynGENIE3 availability matches data files",
           has_dyn == (d / "dyngenie3_importances_top100.csv").exists())
 
-    # Territories
-    sizes = {}
-    for n in N:
-        sizes[n["m"]] = sizes.get(n["m"], 0) + 1
-    check("territory sizes match gene membership", all(sizes.get(t["id"]) == t["size"] for t in T))
-    byid = {n["id"]: n for n in N}
-    check("each hub is a member TF of its territory",
-          all(byid[t["hub"]]["m"] == t["id"] and byid[t["hub"]]["tf"] and byid[t["hub"]]["hub"] for t in T))
-    check("each hub sits at its territory centre",
-          all(abs(byid[t["hub"]]["x"] - t["x"]) < 0.01 and abs(byid[t["hub"]]["y"] - t["y"]) < 0.01 for t in T))
-    inside = all(math.hypot(n["x"] - T[n["m"]]["x"], n["y"] - T[n["m"]]["y"]) <= T[n["m"]]["r"] + 0.01 for n in N)
-    check("every gene lies inside its own territory disk", inside)
-    gaps = [math.hypot(a["x"] - b["x"], a["y"] - b["y"]) - a["r"] - b["r"]
-            for i, a in enumerate(T) for b in T[i + 1:]]
-    check("territories do not overlap", min(gaps) > 0, f"min gap {min(gaps):.2f}")
-    # Recompute (independently of the build script) whether territory
-    # positions reflect how strongly territories interact.
-    k = len(T)
-    w = [[0.0] * k for _ in range(k)]
-    for s, t, c in E:
-        ms, mt = N[s]["m"], N[t]["m"]
-        if ms != mt:
-            v = sum(abs(x) for x in c if x is not None)
-            w[ms][mt] += v
-            w[mt][ms] += v
-    S = [sum(r) for r in w]
-    aff, gap = [], []
-    for i in range(k):
-        for j in range(i + 1, k):
-            aff.append(w[i][j] / math.sqrt(S[i] * S[j]) if S[i] and S[j] else 0.0)
-            gap.append(math.hypot(T[i]["x"] - T[j]["x"], T[i]["y"] - T[j]["y"]) - T[i]["r"] - T[j]["r"])
-    rho = spearman(aff, gap)
-    check("territory positions reflect interaction strength (recomputed Spearman rho < -0.5)",
-          rho < -0.5, f"rho(affinity, gap) = {rho:.3f}; stored {json.dumps(g.get('placement', {}))}")
     return g
 
 
@@ -349,7 +355,7 @@ def main():
     n_fail = sum(1 for ok, *_ in results if not ok)
     summary = f"{len(results) - n_fail}/{len(results)} checks passed ({time.time() - t0:.0f}s)"
     if skipped:
-        summary += f"; {len(skipped)} skipped ({CACHE_HINT})"
+        summary += f"; {len(skipped)} skipped (see the SKIP lines above)"
     print(f"\n{summary}")
     report = [f"Validation report -- {time.strftime('%Y-%m-%d %H:%M')} -- compartments: {', '.join(comps)}",
               summary, ""] + [f"[{'PASS' if ok else 'FAIL'}] {n}" + (f" -- {d}" if d else "") for ok, n, d in results] \

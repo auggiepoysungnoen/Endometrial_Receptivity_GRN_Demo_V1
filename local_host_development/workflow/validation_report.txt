@@ -1,10 +1,16 @@
-Validation report -- 2026-09-22 22:20 -- compartments: stromal
+Validation report -- 2026-09-22 22:23 -- compartments: stromal
 49/49 checks passed (2s)
 
 [PASS] groups are the 6 CellOracle groups in order
 [PASS] gene ids unique -- 1000 genes
 [PASS] all coordinates finite
 [PASS] all edges reference valid genes
+[PASS] territory sizes match gene membership
+[PASS] each hub is a member TF of its territory
+[PASS] each hub sits at its territory centre
+[PASS] every gene lies inside its own territory disk
+[PASS] territories do not overlap -- min gap 3.00
+[PASS] territory positions reflect interaction strength (recomputed Spearman rho < -0.5) -- rho(affinity, gap) = -0.783; stored {"spearman_affinity_vs_centre_distance": -0.703, "spearman_affinity_vs_gap": -0.784, "min_gap": 3.0}
 [PASS] edge set identical to network_snapshots.csv (all 6 groups) -- 12000 group-edges; missing 0, extra 0
 [PASS] coef_mean values match source (rounded to 4 dp) -- max |diff| 5.00e-05
 [PASS] each group has 2,000 edges -- {'Fertile_LH+3': 2000, 'Fertile_LH+5': 2000, 'Fertile_LH+7': 2000, 'Fertile_LH+9': 2000, 'Fertile_LH+11': 2000, 'RIF_LH+7': 2000}
@@ -20,12 +26,6 @@ Validation report -- 2026-09-22 22:20 -- compartments: stromal
 [PASS] WOI/RIF driver ranks match ranked lists
 [PASS] dual-validated flags match dynGENIE3_validated column -- RORA, ZEB1
 [PASS] dynGENIE3 availability matches data files
-[PASS] territory sizes match gene membership
-[PASS] each hub is a member TF of its territory
-[PASS] each hub sits at its territory centre
-[PASS] every gene lies inside its own territory disk
-[PASS] territories do not overlap -- min gap 3.00
-[PASS] territory positions reflect interaction strength (recomputed Spearman rho < -0.5) -- rho(affinity, gap) = -0.783; stored {"spearman_affinity_vs_centre_distance": -0.703, "spearman_affinity_vs_gap": -0.784, "min_gap": 3.0}
 [PASS] every network gene has an annotation record -- 0 missing
 [PASS] evidence tier consistent with paper count and thresholds -- [(10, 'strong'), (3, 'moderate'), (1, 'limited'), (0, 'none')]
 [PASS] paper lists are real PubMed records (title + year present)
