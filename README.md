@@ -1,4 +1,4 @@
-# Endometrial GRN Explorer · demo_v1
+# ASTRAEA · Endometrial Receptivity GRN Atlas · demo_v1
 
 Interactive map of the **stromal-cell gene regulatory network** of the human
 endometrium, comparing **fertile** vs **recurrent implantation failure (RIF)**
@@ -17,7 +17,7 @@ at **LH+7** (window of implantation). Networks inferred with CellOracle.
 
 | Path | Contents |
 |---|---|
-| `local_host_development/site/` | The website (static HTML/JS; published by GitHub Pages) |
+| `local_host_development/site/` | The website: `index.html` (ASTRAEA entry page) + `atlas.html` (the atlas), published by GitHub Pages |
 | `local_host_development/script/` | Build scripts (territory layout, literature annotations), validation suite, local server |
 | `local_host_development/curation/` | Draft implantation notes + review workflow |
 | `local_host_development/workflow/` | Design, functionality, progress log, validation report |

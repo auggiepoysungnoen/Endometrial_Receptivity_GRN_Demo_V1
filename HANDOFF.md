@@ -38,7 +38,7 @@ pip install -r requirements.txt           # or: conda env create -f environment.
 
 ```bash
 python3 -m http.server 8000 --bind 127.0.0.1     # from the repo root (any OS)
-# open http://127.0.0.1:8000/local_host_development/site/
+# open http://127.0.0.1:8000/local_host_development/site/   (entry page)
 ```
 (`local_host_development/script/serve_local.sh` does the same on Mac/Linux.)
 Opening `index.html` by double-click will **not** work: browsers block the
@@ -65,7 +65,10 @@ All paths above are under `local_host_development/`.
 | File | What it is |
 |---|---|
 | `site/app.js` | The whole app: loading, map rendering, territories/roads overlay, filters, panels, reading guide, resizable sidebars |
-| `site/index.html`, `style.css` | Layout, cards (numbered 1–7 left, lettered A–F right), reading guide |
+| `site/index.html` | Entry page: ASTRAEA logo + Desktop / iPad / Mobile tabs |
+| `site/atlas.html`, `style.css`, `landing.css` | The atlas itself, and the entry-page styles |
+| `site/assets/*.svg` | ASTRAEA logo and star mark |
+| `script/_paths.py` | Finds site/data/cache in either layout (workspace or website repo) |
 | `script/build_territory_graph.py` | Build map data for one compartment |
 | `script/build_gene_annotations.py` | Build literature data for all compartments (downloads ~100 MB on first run into `.cache/`, ~10 min) |
 | `script/validate_site.py` | 44 data checks against the original exports |

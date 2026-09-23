@@ -1,4 +1,4 @@
-Validation report -- 2026-09-22 22:23 -- compartments: stromal
+Validation report -- 2026-09-22 22:31 -- compartments: stromal
 49/49 checks passed (2s)
 
 [PASS] groups are the 6 CellOracle groups in order
@@ -40,7 +40,7 @@ Validation report -- 2026-09-22 22:23 -- compartments: stromal
 [PASS] every curated-note PMID is linked to that gene in NCBI (GeneRIF or gene2pubmed) -- 86 citations; untraced []
 [PASS] atlas.html references existing style.css
 [PASS] atlas.html references existing app.js
-[PASS] landing page links to the atlas
+[PASS] landing page offers the three platform entries
 [PASS] landing page asset present: landing.css
 [PASS] logo mark file present and used as the icon
 [PASS] landing page carries the inline vector wordmark
