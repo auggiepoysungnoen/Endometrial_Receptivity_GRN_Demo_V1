@@ -37,7 +37,22 @@ const shot = async (p, name) => { if (OUT) await p.screenshot({ path: `${OUT}/${
   p.on("response", (r) => { if (r.status() >= 400) failed.push(`${r.status()} ${r.url()}`); });
 
   console.log(`== browser smoke test: ${BASE}`);
+
+  // Landing page first.
   await p.goto(BASE + "?t=" + Date.now(), { waitUntil: "networkidle" });
+  await p.waitForTimeout(400);
+  const landing = await p.evaluate(() => {
+    const el = document.querySelector(".logo");           // inline SVG lockup
+    const box = el && el.getBoundingClientRect();
+    return { title: document.title, logoOk: !!box && box.width > 200 && box.height > 30,
+             wordmark: !!el && /ASTRAEA/.test(el.textContent),
+             enter: document.querySelector(".enter")?.getAttribute("href") };
+  });
+  check("Landing page shows the ASTRAEA logo", landing.logoOk && landing.wordmark && /ASTRAEA/.test(landing.title), JSON.stringify(landing));
+  check("'Enter the atlas' links to the atlas page", landing.enter === "atlas.html");
+  await shot(p, "00_landing");
+  await p.click(".enter");
+  await p.waitForLoadState("networkidle");
   await p.waitForSelector("#stats div", { timeout: 20000 });
   await p.waitForTimeout(800);
 

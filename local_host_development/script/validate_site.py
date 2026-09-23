@@ -26,11 +26,13 @@ import urllib.request
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parents[1]                      # Nandini_Website/
-DEV = ROOT / "local_host_development"
-SITE = DEV / "site"
 sys.path.insert(0, str(HERE))
+from _paths import paths  # noqa: E402
 import build_gene_annotations as bga  # noqa: E402
+
+P = paths(__file__)
+ROOT, EXPORTS, SITE = P["root"], P["exports"], P["site"]
+DOCS = P["docs"]
 
 GROUPS = ["Fertile_LH+3", "Fertile_LH+5", "Fertile_LH+7",
           "Fertile_LH+9", "Fertile_LH+11", "RIF_LH+7"]
@@ -45,8 +47,8 @@ def check(name, ok, detail=""):
 
 
 skipped = []
-CACHE = DEV / ".cache"
-CACHE_HINT = "needs local_host_development/.cache -- run build_gene_annotations.py once"
+CACHE = P["cache"]
+CACHE_HINT = "needs the .cache folder -- run build_gene_annotations.py once"
 
 
 def skip(name, why=CACHE_HINT):
@@ -95,7 +97,7 @@ def ranked(path):
 def validate_graph(comp):
     print(f"\n== {comp}: network graph ({comp}_graph.json vs data/{comp}/)")
     g = json.loads((SITE / "data" / f"{comp}_graph.json").read_text())
-    d = ROOT / "data" / comp
+    d = EXPORTS / comp
     N, E, T = g["nodes"], g["edges"], g["territories"]
     ids = [n["id"] for n in N]
     check("groups are the 6 CellOracle groups in order", g["groups"] == GROUPS)
@@ -152,7 +154,7 @@ def validate_graph(comp):
     check("eigenvector centrality + degree match node_centrality.csv", bad == 0, f"{bad} mismatches")
 
     # Flags vs source lists
-    tfs = {r["gene"] for r in rows(ROOT / "data" / "tf_list.csv")}
+    tfs = {r["gene"] for r in rows(EXPORTS / "tf_list.csv")}
     check("TF flag matches tf_list.csv", all(n["tf"] == (n["id"] in tfs) for n in N))
     cur = {r["gene"] for r in rows(d / "curated_hub_genes.csv")}
     check("paper-figure flag matches curated_hub_genes.csv", {n["id"] for n in N if n["curated"]} == cur)
@@ -282,12 +284,12 @@ def validate_literature_tools():
         skip("every curated-note PMID is linked to that gene in NCBI (GeneRIF or gene2pubmed)")
         return
     notes = bga.read_notes()
-    mg = json.loads((DEV / ".cache" / "mygene_v2.json").read_text())
+    mg = json.loads((CACHE / "mygene_v2.json").read_text())
     ent = {h["query"]: str(h["entrezgene"]) for h in mg if "entrezgene" in h and not h.get("notfound")}
-    links = json.loads((DEV / ".cache" / "gene_pubmed_implantation.json").read_text())
+    links = json.loads((CACHE / "gene_pubmed_implantation.json").read_text())
     rifp = {}
     want = {ent[g] for g in notes if g in ent}
-    with gzip.open(DEV / ".cache" / "generifs_basic.gz", "rt", encoding="utf-8", errors="replace") as fh:
+    with gzip.open(CACHE / "generifs_basic.gz", "rt", encoding="utf-8", errors="replace") as fh:
         next(fh)
         for line in fh:
             tax, gid, pm, _ts, _txt = line.split("\t", 4)
@@ -302,9 +304,17 @@ def validate_literature_tools():
 # ---------------------------------------------------------------- site files
 def validate_site_files(comps):
     print("\n== site files")
-    html = (SITE / "index.html").read_text()
+    landing = (SITE / "index.html").read_text()
+    html = (SITE / "atlas.html").read_text()
     for f in ["style.css", "app.js"]:
-        check(f"index.html references existing {f}", f in html and (SITE / f).exists())
+        check(f"atlas.html references existing {f}", f in html and (SITE / f).exists())
+    check("landing page links to the atlas", 'href="atlas.html"' in landing)
+    check("landing page asset present: landing.css", "landing.css" in landing and (SITE / "landing.css").exists())
+    check("logo mark file present and used as the icon",
+          (SITE / "assets" / "astraea-mark.svg").exists() and "assets/astraea-mark.svg" in landing and "assets/astraea-mark.svg" in html)
+    check("landing page carries the inline vector wordmark",
+          '<svg class="logo"' in landing and ">ASTRAEA<" in landing and (SITE / "assets" / "astraea-logo.svg").exists())
+    check("both pages use the ASTRAEA name", "ASTRAEA" in landing and "ASTRAEA" in html)
     try:
         subprocess.run(["node", "--check", str(SITE / "app.js")], check=True, capture_output=True)
         check("app.js parses (node --check)", True)
@@ -314,10 +324,10 @@ def validate_site_files(comps):
         check("app.js parses (node --check)", False, e.stderr.decode()[:200])
     js = (SITE / "app.js").read_text()
     m = re.search(r'const COMPARTMENT = "(\w+)"', js)
-    check("page's compartment has graph + annotation data",
+    check("atlas page's compartment has graph + annotation data",
           m and (SITE / "data" / f"{m.group(1)}_graph.json").exists()
           and (SITE / "data" / f"{m.group(1)}_annotations.json").exists(), m.group(1) if m else "")
-    for url in re.findall(r'src="(https://[^"]+)"', html):
+    for url in re.findall(r'src="(https://[^"]+)"', html + landing):
         try:
             with urllib.request.urlopen(urllib.request.Request(url, method="HEAD"), timeout=20) as r:
                 ok = r.status == 200
@@ -344,7 +354,7 @@ def main():
     report = [f"Validation report -- {time.strftime('%Y-%m-%d %H:%M')} -- compartments: {', '.join(comps)}",
               summary, ""] + [f"[{'PASS' if ok else 'FAIL'}] {n}" + (f" -- {d}" if d else "") for ok, n, d in results] \
         + [f"[SKIP] {n} -- {w}" for n, w in skipped]
-    (DEV / "workflow" / "validation_report.txt").write_text("\n".join(report) + "\n")
+    (DOCS / "validation_report.txt").write_text("\n".join(report) + "\n")
     return 1 if n_fail else 0
 
 

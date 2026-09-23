@@ -48,11 +48,12 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]            # Nandini_Website/
-DEV = ROOT / "local_host_development"
-CACHE = DEV / ".cache"
-OUT = DEV / "site" / "data"
-NOTES = DEV / "curation" / "implantation_gene_notes.csv"
+from _paths import paths
+
+P = paths(__file__)
+ROOT, EXPORTS = P["root"], P["exports"]
+CACHE, OUT = P["cache"], P["site_data"]
+NOTES = P["curation"] / "implantation_gene_notes.csv"
 
 IMPLANTATION_QUERY = (
     '("Embryo Implantation"[Mesh] OR "Decidua"[Mesh] OR decidualization[tiab] '
@@ -117,7 +118,7 @@ def eutils(tool, params, tries=4):
 # ---------------------------------------------------------------- steps
 def all_genes():
     genes, per_comp = set(), {}
-    for f in sorted(glob.glob(str(ROOT / "data" / "*" / "network_snapshots.csv"))):
+    for f in sorted(glob.glob(str(EXPORTS / "*" / "network_snapshots.csv"))):
         comp = Path(f).parent.name
         s = set()
         with open(f) as fh:
@@ -318,7 +319,7 @@ def main():
 
     print("[4/4] CollecTRI TF-target literature")
     union_pairs = set()
-    for f in glob.glob(str(ROOT / "data" / "*" / "network_snapshots.csv")):
+    for f in glob.glob(str(EXPORTS / "*" / "network_snapshots.csv")):
         with open(f) as fh:
             union_pairs |= {f"{r['source']}>{r['target']}" for r in csv.DictReader(fh)}
     lit_edges = collectri(union_pairs)

@@ -49,15 +49,17 @@ TERRITORY_COLORS = [
     "#d4c28a", "#80cbc4", "#e5a5ff", "#c3e88d", "#ffcb8b", "#a3b8cc",
 ]
 
-ROOT = Path(__file__).resolve().parents[2]          # Nandini_Website/
-OUT_DIR = ROOT / "local_host_development" / "site" / "data"
+from _paths import paths
+
+P = paths(__file__)
+ROOT, EXPORTS, OUT_DIR = P["root"], P["exports"], P["site_data"]
 
 
 def load(compartment):
-    d = ROOT / "data" / compartment
+    d = EXPORTS / compartment
     snap = pd.read_csv(d / "network_snapshots.csv")
     cent = pd.read_csv(d / "node_centrality.csv")
-    tfs = set(pd.read_csv(ROOT / "data" / "tf_list.csv")["gene"])
+    tfs = set(pd.read_csv(EXPORTS / "tf_list.csv")["gene"])
     curated = pd.read_csv(d / "curated_hub_genes.csv").set_index("gene")
     woi = pd.read_csv(d / "top_WOI_regulators_ranked.csv", index_col=0)
     rif = pd.read_csv(d / "top_RIF_regulators_ranked.csv", index_col=0)
